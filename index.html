@@ -37,6 +37,7 @@
     }
     .header-title { font-size: 1rem; font-weight: 700; letter-spacing: -.3px; }
     .header-title span { color: var(--accent); }
+    .header-right { display: flex; align-items: center; gap: 10px; }
     #btn-logout {
       background: rgba(255,255,255,.15);
       border: 1px solid rgba(255,255,255,.3);
@@ -44,6 +45,23 @@
       border-radius: 20px; cursor: pointer; display: none;
     }
     #btn-logout:hover { background: rgba(255,255,255,.25); }
+
+    /* ── 탭 네비게이션 ── */
+    .tab-nav {
+      display: none;
+      background: var(--primary-d);
+      padding: 0 20px;
+      gap: 4px;
+    }
+    .tab-nav.visible { display: flex; }
+    .tab-btn {
+      background: none; border: none; color: rgba(255,255,255,.6);
+      font-size: .88rem; padding: 10px 16px; cursor: pointer;
+      border-bottom: 2px solid transparent; font-weight: 500;
+      transition: all .15s;
+    }
+    .tab-btn:hover { color: #fff; }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
 
     /* ── 인증 화면 ── */
     #auth-screen {
@@ -78,17 +96,17 @@
     #btn-login:hover { background: var(--primary-d); }
     .auth-hint { margin-top: 16px; font-size: .8rem; color: var(--text-s); }
 
-    /* ── 검색 화면 ── */
-    #search-screen { display: none; max-width: 800px; margin: 0 auto; padding: 20px 16px; }
+    /* ── 탭 패널 공통 ── */
+    .tab-panel { display: none; max-width: 800px; margin: 0 auto; padding: 20px 16px; }
+    .tab-panel.active { display: block; }
 
+    /* ── 검색 탭 ── */
     .search-bar {
       background: var(--card-bg); border-radius: var(--radius);
       box-shadow: var(--shadow); padding: 16px;
       margin-bottom: 12px;
     }
-    .search-input-wrap {
-      display: flex; gap: 8px; margin-bottom: 10px;
-    }
+    .search-input-wrap { display: flex; gap: 8px; margin-bottom: 10px; }
     .search-input-wrap input {
       flex: 1; padding: 11px 14px;
       border: 2px solid var(--border); border-radius: 8px;
@@ -104,15 +122,10 @@
     .filters select {
       flex: 1; min-width: 100px; padding: 8px 10px;
       border: 1.5px solid var(--border); border-radius: 8px;
-      font-size: .85rem; background: #fff; cursor: pointer;
-      color: var(--text);
+      font-size: .85rem; background: #fff; cursor: pointer; color: var(--text);
     }
     .filters select:focus { outline: none; border-color: var(--primary); }
-
-    .result-count {
-      font-size: .88rem; color: var(--text-s);
-      margin-bottom: 12px; padding: 0 2px;
-    }
+    .result-count { font-size: .88rem; color: var(--text-s); margin-bottom: 12px; padding: 0 2px; }
     .result-count strong { color: var(--primary); }
 
     /* ── 카드 ── */
@@ -139,7 +152,6 @@
     .tag-duration { background: #fdf4e3; color: #9a6800; }
     .tag-count    { background: #f3edfc; color: #6a2db8; }
     .card-toggle { font-size: 1.1rem; color: var(--text-s); flex-shrink: 0; padding-top: 2px; }
-
     .card-body { display: none; border-top: 1.5px solid var(--border); }
     .card-body.open { display: block; }
     .card-section { padding: 14px 18px; border-bottom: 1px solid var(--border); }
@@ -155,6 +167,39 @@
     .interview-info { display: flex; flex-wrap: wrap; gap: 8px; }
     .info-item { font-size: .85rem; color: var(--text-s); }
     .info-item strong { color: var(--text); }
+
+    /* ── AI 분석 배지 ── */
+    .ai-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: .72rem; padding: 2px 8px; border-radius: 20px;
+      background: linear-gradient(135deg, #1a3a6b22, #c8a95122);
+      border: 1px solid var(--accent); color: var(--primary);
+      font-weight: 600; cursor: pointer; transition: all .15s;
+    }
+    .ai-badge:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .ai-analysis-box {
+      margin: 10px 18px 14px; padding: 14px 16px;
+      background: linear-gradient(135deg, #f8faff, #fffdf5);
+      border: 1px solid var(--accent); border-radius: 10px;
+      display: none;
+    }
+    .ai-analysis-box.open { display: block; }
+    .ai-analysis-box .ai-title {
+      font-size: .78rem; font-weight: 700; color: var(--accent);
+      letter-spacing: .05em; margin-bottom: 8px;
+    }
+    .ai-analysis-box .ai-summary { font-size: .87rem; line-height: 1.7; margin-bottom: 10px; }
+    .ai-analysis-box .ai-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
+    .ai-chip {
+      font-size: .75rem; padding: 3px 10px; border-radius: 20px;
+      background: #e8edf8; color: var(--primary);
+    }
+    .ai-chip.diff-상 { background: #fde8e8; color: #c0392b; }
+    .ai-chip.diff-중 { background: #fdf4e3; color: #9a6800; }
+    .ai-chip.diff-하 { background: #edf7ed; color: #2d7a2d; }
+    .ai-tip { font-size: .82rem; color: var(--text-s); line-height: 1.6;
+              border-top: 1px solid var(--border); padding-top: 8px; margin-top: 8px; }
+    .ai-tip strong { color: var(--primary); }
 
     mark { background: var(--highlight); border-radius: 2px; padding: 0 1px; }
 
@@ -173,11 +218,99 @@
     }
     #no-result .emoji { font-size: 2.5rem; margin-bottom: 10px; }
 
-    /* ── 반응형 ── */
+    /* ── 분석 탭 ── */
+    .analysis-section { margin-bottom: 24px; }
+    .analysis-header {
+      background: var(--primary); color: #fff;
+      border-radius: var(--radius) var(--radius) 0 0;
+      padding: 14px 18px;
+    }
+    .analysis-header h2 { font-size: 1rem; font-weight: 700; }
+    .analysis-header p  { font-size: .82rem; opacity: .75; margin-top: 3px; }
+    .analysis-body {
+      background: var(--card-bg); border-radius: 0 0 var(--radius) var(--radius);
+      border: 1.5px solid var(--border); border-top: none;
+      box-shadow: var(--shadow);
+    }
+
+    /* 기수별 트렌드 */
+    .cohort-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0; }
+    .cohort-cell {
+      padding: 16px 18px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    }
+    .cohort-cell:nth-child(2n) { border-right: none; }
+    .cohort-cell:nth-last-child(-n+2) { border-bottom: none; }
+    .cohort-label { font-size: .78rem; font-weight: 700; color: var(--accent); margin-bottom: 6px; }
+    .cohort-summary { font-size: .84rem; line-height: 1.65; margin-bottom: 8px; }
+    .cohort-themes { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+    .theme-chip { font-size: .72rem; padding: 2px 8px; border-radius: 12px; background: #e8edf8; color: var(--primary); }
+    .cohort-advice { font-size: .8rem; color: var(--text-s); line-height: 1.6;
+                     border-top: 1px solid var(--border); padding-top: 8px; font-style: italic; }
+
+    /* 질문 유형 */
+    .qtype-list { padding: 8px 0; }
+    .qtype-item {
+      padding: 14px 18px; border-bottom: 1px solid var(--border); cursor: pointer;
+      transition: background .15s;
+    }
+    .qtype-item:last-child { border-bottom: none; }
+    .qtype-item:hover { background: #f8faff; }
+    .qtype-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .qtype-name { font-size: .92rem; font-weight: 700; color: var(--primary); }
+    .qtype-freq {
+      font-size: .72rem; padding: 2px 9px; border-radius: 12px; flex-shrink: 0;
+      font-weight: 600;
+    }
+    .freq-높음 { background: #fde8e8; color: #c0392b; }
+    .freq-보통 { background: #fdf4e3; color: #9a6800; }
+    .freq-낮음 { background: #edf7ed; color: #2d7a2d; }
+    .qtype-desc { font-size: .83rem; color: var(--text-s); margin-top: 4px; }
+    .qtype-detail { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+    .qtype-detail.open { display: block; }
+    .qtype-examples { margin-bottom: 8px; }
+    .qtype-examples li { font-size: .82rem; color: var(--text); line-height: 1.7; margin-left: 16px; }
+    .qtype-prep { font-size: .82rem; color: var(--text-s); line-height: 1.6; }
+    .qtype-prep strong { color: var(--primary); }
+    .qtype-toggle { font-size: .9rem; color: var(--text-s); }
+    .overall-insight {
+      padding: 14px 18px; background: linear-gradient(135deg, #f8faff, #fffdf5);
+      border-top: 1.5px solid var(--border);
+      font-size: .86rem; line-height: 1.75; color: var(--text);
+    }
+    .overall-insight .label { font-size: .75rem; font-weight: 700; color: var(--accent); margin-bottom: 6px; }
+
+    /* 전형 비교 */
+    .admission-grid { display: grid; gap: 0; }
+    .admission-item { padding: 16px 18px; border-bottom: 1px solid var(--border); }
+    .admission-item:last-child { border-bottom: none; }
+    .admission-name { font-size: .92rem; font-weight: 700; color: var(--primary); margin-bottom: 4px; }
+    .admission-count { font-size: .78rem; color: var(--text-s); margin-bottom: 8px; }
+    .admission-summary { font-size: .84rem; line-height: 1.7; margin-bottom: 10px; }
+    .admission-chars { margin-bottom: 10px; }
+    .admission-chars li { font-size: .82rem; line-height: 1.7; margin-left: 16px; color: var(--text); }
+    .admission-style { font-size: .82rem; color: var(--text-s); line-height: 1.6; margin-bottom: 8px; }
+    .prep-list { display: flex; flex-wrap: wrap; gap: 5px; }
+    .prep-chip { font-size: .75rem; padding: 3px 10px; border-radius: 20px; background: #fdf4e3; color: #9a6800; }
+
+    /* 학교별 분석 셀렉터 */
+    .school-selector-wrap { padding: 14px 18px; border-bottom: 1px solid var(--border); }
+    .school-selector-wrap select {
+      width: 100%; padding: 9px 12px; border: 1.5px solid var(--border);
+      border-radius: 8px; font-size: .92rem; color: var(--text); background: #fff;
+    }
+    .school-selector-wrap select:focus { outline: none; border-color: var(--primary); }
+    #school-detail { padding: 16px 18px; min-height: 60px; }
+    .school-empty { color: var(--text-s); font-size: .88rem; text-align: center; padding: 20px 0; }
+
+    /* 반응형 */
     @media (max-width: 480px) {
       .auth-box { padding: 28px 20px; }
       .card-meta h3 { font-size: .95rem; }
       .filters select { min-width: 80px; font-size: .8rem; }
+      .cohort-grid { grid-template-columns: 1fr; }
+      .cohort-cell { border-right: none; }
+      .cohort-cell:nth-last-child(-n+2) { border-bottom: 1px solid var(--border); }
+      .cohort-cell:last-child { border-bottom: none; }
     }
   </style>
 </head>
@@ -185,8 +318,15 @@
 
 <header>
   <div class="header-title">🏫 <span>수원외고</span> 면접후기 자료집</div>
-  <button id="btn-logout" onclick="logout()">로그아웃</button>
+  <div class="header-right">
+    <button id="btn-logout" onclick="logout()">로그아웃</button>
+  </div>
 </header>
+
+<nav class="tab-nav" id="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('search', this)">🔍 검색</button>
+  <button class="tab-btn" onclick="switchTab('analysis', this)">✨ AI 분석</button>
+</nav>
 
 <!-- 인증 화면 -->
 <div id="auth-screen">
@@ -204,8 +344,8 @@
   </div>
 </div>
 
-<!-- 검색 화면 -->
-<div id="search-screen">
+<!-- 검색 탭 -->
+<div id="tab-search" class="tab-panel active">
   <div class="search-bar">
     <div class="search-input-wrap">
       <input type="text" id="search-input" placeholder="학교명, 학과, 전형명, 면접 내용 검색"
@@ -232,7 +372,6 @@
       </select>
     </div>
   </div>
-
   <div class="result-count" id="result-count"></div>
   <div id="card-list"></div>
   <div id="no-result">
@@ -244,9 +383,69 @@
   </div>
 </div>
 
+<!-- AI 분석 탭 -->
+<div id="tab-analysis" class="tab-panel">
+
+  <!-- 1. 기수별 트렌드 -->
+  <div class="analysis-section">
+    <div class="analysis-header">
+      <h2>📅 기수별 면접 트렌드</h2>
+      <p>15기~18기 선배들의 면접 경향 변화</p>
+    </div>
+    <div class="analysis-body">
+      <div class="cohort-grid" id="cohort-grid">
+        <div style="padding:20px;color:var(--text-s)">데이터 로딩 중...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 질문 유형 분류 -->
+  <div class="analysis-section">
+    <div class="analysis-header">
+      <h2>❓ 면접 질문 유형 분류</h2>
+      <p>409건의 후기에서 도출한 핵심 질문 패턴</p>
+    </div>
+    <div class="analysis-body">
+      <div class="qtype-list" id="qtype-list"></div>
+      <div class="overall-insight" id="overall-insight"></div>
+    </div>
+  </div>
+
+  <!-- 3. 전형 유형별 비교 -->
+  <div class="analysis-section">
+    <div class="analysis-header">
+      <h2>📋 전형 유형별 면접 비교</h2>
+      <p>학생부종합 · 학생부교과 · 기타 전형의 차이</p>
+    </div>
+    <div class="analysis-body">
+      <div class="admission-grid" id="admission-grid"></div>
+    </div>
+  </div>
+
+  <!-- 4. 학교별 심층 분석 -->
+  <div class="analysis-section">
+    <div class="analysis-header">
+      <h2>🏛 학교별 심층 분석</h2>
+      <p>학교를 선택하면 AI가 분석한 면접 특징을 볼 수 있습니다</p>
+    </div>
+    <div class="analysis-body">
+      <div class="school-selector-wrap">
+        <select id="school-select" onchange="showSchoolDetail(this.value)">
+          <option value="">학교를 선택하세요</option>
+        </select>
+      </div>
+      <div id="school-detail">
+        <div class="school-empty">위에서 학교를 선택하세요</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /tab-analysis -->
+
 <script>
 // ── 전역 상태 ──
 let allData = [];
+let analysisData = null;
 let filtered = [];
 let shown = 0;
 const PAGE = 20;
@@ -256,24 +455,28 @@ let searchTimer = null;
 // ── 초기화 ──
 async function init() {
   try {
-    const [authRes, dataRes] = await Promise.all([
-      fetch('auth.json'), fetch('interviews.json')
+    const [authRes, dataRes, analysisRes] = await Promise.all([
+      fetch('auth.json'),
+      fetch('interviews.json'),
+      fetch('school-analysis.json')
     ]);
     const auth = await authRes.json();
     authHash = auth.hash;
     document.getElementById('auth-hint').textContent = auth.hint || '담임선생님께 문의하세요';
 
     allData = await dataRes.json();
-    // 기수 최신순 정렬
     allData.sort((a, b) => (b.cohort || '').localeCompare(a.cohort || ''));
     buildSchoolFilter();
+
+    analysisData = await analysisRes.json();
+    buildAnalysisTabs();
   } catch(e) {
     console.error('데이터 로드 실패', e);
   }
   checkAuth();
 }
 
-// ── 학교 필터 옵션 자동 생성 ──
+// ── 학교 필터 자동 생성 ──
 function buildSchoolFilter() {
   const schools = [...new Set(allData.map(d => d.school).filter(Boolean))].sort();
   const sel = document.getElementById('filter-school');
@@ -302,7 +505,7 @@ async function login() {
   if (!code) { errEl.textContent = '인증코드를 입력해주세요.'; return; }
   const hash = await sha256(code);
   if (hash === authHash) {
-    const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30일
+    const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000;
     localStorage.setItem('sawl_auth', hash);
     localStorage.setItem('sawl_auth_expiry', expiry);
     input.classList.remove('error');
@@ -324,16 +527,27 @@ function logout() {
 
 function showAuth() {
   document.getElementById('auth-screen').style.display = 'flex';
-  document.getElementById('search-screen').style.display = 'none';
+  document.getElementById('tab-search').classList.remove('active');
+  document.getElementById('tab-analysis').classList.remove('active');
+  document.getElementById('tab-nav').classList.remove('visible');
   document.getElementById('btn-logout').style.display = 'none';
   document.getElementById('code-input').focus();
 }
 
 function showSearch() {
   document.getElementById('auth-screen').style.display = 'none';
-  document.getElementById('search-screen').style.display = 'block';
+  document.getElementById('tab-nav').classList.add('visible');
   document.getElementById('btn-logout').style.display = 'inline-block';
-  doSearch();
+  switchTab('search', document.querySelector('.tab-btn'));
+}
+
+// ── 탭 전환 ──
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'search') doSearch();
 }
 
 // ── 검색 ──
@@ -397,16 +611,21 @@ function makeCard(d, kw) {
   card.className = 'card';
 
   const tags = [];
-  if (d.cohort)           tags.push(`<span class="tag tag-cohort">${d.cohort}</span>`);
-  if (d.admission_type)   tags.push(`<span class="tag tag-type">${esc(d.admission_type)}</span>`);
+  if (d.cohort)             tags.push(`<span class="tag tag-cohort">${d.cohort}</span>`);
+  if (d.admission_type)     tags.push(`<span class="tag tag-type">${esc(d.admission_type)}</span>`);
   if (d.interview_duration) tags.push(`<span class="tag tag-duration">⏱ ${esc(d.interview_duration)}</span>`);
   if (d.interviewer_count)  tags.push(`<span class="tag tag-count">👥 ${esc(d.interviewer_count)}</span>`);
+
+  const hasAI = analysisData && analysisData.schools && analysisData.schools[d.school];
+  const aiBadge = hasAI
+    ? `<span class="ai-badge" onclick="toggleAI(event, this, '${esc(d.school)}')">✨ AI 분석</span>`
+    : '';
 
   card.innerHTML = `
     <div class="card-header" onclick="toggleCard(this)">
       <div class="card-meta">
         <h3>${hi(esc(d.school || '미확인'), kw)} <span class="dept">· ${hi(esc(d.department || ''), kw)}</span></h3>
-        <div class="card-tags">${tags.join('')}</div>
+        <div class="card-tags">${tags.join('')}${aiBadge}</div>
       </div>
       <div class="card-toggle">▼</div>
     </div>
@@ -439,6 +658,149 @@ function toggleCard(header) {
   const toggle = header.querySelector('.card-toggle');
   const open   = body.classList.toggle('open');
   toggle.textContent = open ? '▲' : '▼';
+}
+
+// ── AI 분석 배지 토글 ──
+function toggleAI(e, badge, school) {
+  e.stopPropagation();
+  const card = badge.closest('.card');
+  let box = card.querySelector('.ai-analysis-box');
+
+  if (!box) {
+    // 카드 바디 열기
+    const body = card.querySelector('.card-body');
+    body.classList.add('open');
+    card.querySelector('.card-toggle').textContent = '▲';
+
+    // AI 분석 박스 삽입
+    box = document.createElement('div');
+    box.className = 'ai-analysis-box';
+    const ai = analysisData.schools[school];
+    const diffClass = `diff-${ai.difficulty || ''}`;
+    box.innerHTML = `
+      <div class="ai-title">✨ AI 분석 — ${esc(school)}</div>
+      <div class="ai-summary">${esc(ai.summary || '')}</div>
+      <div class="ai-chips">
+        ${(ai.question_types || []).map(q => `<span class="ai-chip">${esc(q)}</span>`).join('')}
+        ${ai.difficulty ? `<span class="ai-chip ${diffClass}">난이도 ${esc(ai.difficulty)}</span>` : ''}
+      </div>
+      ${ai.tip ? `<div class="ai-tip"><strong>핵심 팁</strong> ${esc(ai.tip)}</div>` : ''}
+    `;
+    body.insertBefore(box, body.firstChild);
+  }
+  box.classList.toggle('open');
+}
+
+// ── 분석 탭 렌더링 ──
+function buildAnalysisTabs() {
+  if (!analysisData) return;
+  buildCohortGrid();
+  buildQtypeList();
+  buildAdmissionGrid();
+  buildSchoolSelector();
+}
+
+function buildCohortGrid() {
+  const grid = document.getElementById('cohort-grid');
+  const trends = analysisData.cohort_trends || {};
+  grid.innerHTML = Object.entries(trends).sort().map(([cohort, d]) => `
+    <div class="cohort-cell">
+      <div class="cohort-label">${esc(cohort)} · ${d.count}건</div>
+      <div class="cohort-summary">${esc(d.summary || '')}</div>
+      <div class="cohort-themes">
+        ${(d.common_themes || []).map(t => `<span class="theme-chip">${esc(t)}</span>`).join('')}
+      </div>
+      ${d.notable ? `<div class="cohort-advice">${esc(d.notable)}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+function buildQtypeList() {
+  const list = document.getElementById('qtype-list');
+  const qt = analysisData.question_types || {};
+  if (!qt.types) return;
+
+  list.innerHTML = qt.types.map((t, i) => `
+    <div class="qtype-item" onclick="toggleQtype(this)">
+      <div class="qtype-row">
+        <span class="qtype-name">${esc(t.name)}</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="qtype-freq freq-${t.frequency}">${esc(t.frequency)}</span>
+          <span class="qtype-toggle">▼</span>
+        </div>
+      </div>
+      <div class="qtype-desc">${esc(t.description || '')}</div>
+      <div class="qtype-detail">
+        <ul class="qtype-examples">
+          ${(t.example_questions || []).map(q => `<li>${esc(q)}</li>`).join('')}
+        </ul>
+        ${t.prep_tip ? `<div class="qtype-prep"><strong>준비 방법</strong> ${esc(t.prep_tip)}</div>` : ''}
+      </div>
+    </div>
+  `).join('');
+
+  const insight = document.getElementById('overall-insight');
+  if (qt.overall_insight) {
+    insight.innerHTML = `<div class="label">💡 종합 인사이트</div>${esc(qt.overall_insight)}`;
+  }
+}
+
+function toggleQtype(item) {
+  const detail = item.querySelector('.qtype-detail');
+  const toggle = item.querySelector('.qtype-toggle');
+  const open = detail.classList.toggle('open');
+  toggle.textContent = open ? '▲' : '▼';
+}
+
+function buildAdmissionGrid() {
+  const grid = document.getElementById('admission-grid');
+  const ac = analysisData.admission_comparison || {};
+  const order = ['학생부종합', '학생부교과', '논술', '기타'];
+  const sorted = order.map(k => [k, ac[k]]).filter(([, v]) => v);
+
+  grid.innerHTML = sorted.map(([type, d]) => `
+    <div class="admission-item">
+      <div class="admission-name">${esc(type)}</div>
+      <div class="admission-count">${d.count}건</div>
+      <div class="admission-summary">${esc(d.summary || '')}</div>
+      ${d.characteristics ? `
+      <ul class="admission-chars">
+        ${d.characteristics.map(c => `<li>${esc(c)}</li>`).join('')}
+      </ul>` : ''}
+      ${d.interview_style ? `<div class="admission-style">💬 ${esc(d.interview_style)}</div>` : ''}
+      ${d.key_prep ? `
+      <div class="prep-list">
+        ${d.key_prep.map(p => `<span class="prep-chip">${esc(p)}</span>`).join('')}
+      </div>` : ''}
+    </div>
+  `).join('');
+}
+
+function buildSchoolSelector() {
+  const sel = document.getElementById('school-select');
+  const schools = Object.keys(analysisData.schools || {}).sort();
+  schools.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s; opt.textContent = s;
+    sel.appendChild(opt);
+  });
+}
+
+function showSchoolDetail(school) {
+  const box = document.getElementById('school-detail');
+  if (!school) { box.innerHTML = '<div class="school-empty">위에서 학교를 선택하세요</div>'; return; }
+  const ai = analysisData.schools[school];
+  if (!ai) { box.innerHTML = '<div class="school-empty">분석 데이터 없음</div>'; return; }
+  const diffClass = `diff-${ai.difficulty || ''}`;
+  box.innerHTML = `
+    <div class="ai-summary" style="margin-bottom:12px">${esc(ai.summary || '')}</div>
+    <div class="ai-chips" style="margin-bottom:10px">
+      ${(ai.question_types || []).map(q => `<span class="ai-chip">${esc(q)}</span>`).join('')}
+      ${ai.difficulty ? `<span class="ai-chip ${diffClass}">난이도 ${esc(ai.difficulty)}</span>` : ''}
+    </div>
+    ${ai.tip ? `<div class="ai-tip"><strong>핵심 팁</strong> ${esc(ai.tip)}</div>` : ''}
+    <div style="font-size:.78rem;color:var(--text-s);margin-top:12px">총 ${ai.count}건 후기 기반 분석</div>
+  `;
 }
 
 // ── 유틸 ──
