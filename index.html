@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>수원외고 면접후기 자료집</title>
+  <style>
+    /* ── 변수 ── */
+    :root {
+      --primary:   #1a3a6b;
+      --primary-d: #122b52;
+      --accent:    #c8a951;
+      --bg:        #f4f6fb;
+      --card-bg:   #ffffff;
+      --text:      #1e2535;
+      --text-s:    #5a6378;
+      --border:    #dde3f0;
+      --highlight: #fff3a3;
+      --radius:    12px;
+      --shadow:    0 2px 12px rgba(26,58,107,.10);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+           background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* ── 헤더 ── */
+    header {
+      background: var(--primary);
+      color: #fff;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,.25);
+    }
+    .header-title { font-size: 1rem; font-weight: 700; letter-spacing: -.3px; }
+    .header-title span { color: var(--accent); }
+    #btn-logout {
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.3);
+      color: #fff; font-size: .8rem; padding: 5px 12px;
+      border-radius: 20px; cursor: pointer; display: none;
+    }
+    #btn-logout:hover { background: rgba(255,255,255,.25); }
+
+    /* ── 인증 화면 ── */
+    #auth-screen {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; min-height: calc(100vh - 56px);
+      padding: 24px;
+    }
+    .auth-box {
+      background: var(--card-bg); border-radius: var(--radius);
+      box-shadow: var(--shadow); padding: 40px 32px;
+      max-width: 380px; width: 100%; text-align: center;
+    }
+    .auth-icon { font-size: 3rem; margin-bottom: 12px; }
+    .auth-box h2 { font-size: 1.3rem; color: var(--primary); margin-bottom: 6px; }
+    .auth-box p  { font-size: .9rem; color: var(--text-s); margin-bottom: 28px; }
+    .auth-input-wrap { position: relative; margin-bottom: 16px; }
+    .auth-input-wrap input {
+      width: 100%; padding: 14px 16px;
+      border: 2px solid var(--border); border-radius: 8px;
+      font-size: 1rem; letter-spacing: .1em; text-align: center;
+      outline: none; transition: border-color .2s;
+    }
+    .auth-input-wrap input:focus { border-color: var(--primary); }
+    .auth-input-wrap input.error  { border-color: #e05252; }
+    #auth-error { color: #e05252; font-size: .85rem; margin-bottom: 12px; min-height: 20px; }
+    #btn-login {
+      width: 100%; padding: 14px;
+      background: var(--primary); color: #fff;
+      border: none; border-radius: 8px; font-size: 1rem;
+      font-weight: 700; cursor: pointer; transition: background .2s;
+    }
+    #btn-login:hover { background: var(--primary-d); }
+    .auth-hint { margin-top: 16px; font-size: .8rem; color: var(--text-s); }
+
+    /* ── 검색 화면 ── */
+    #search-screen { display: none; max-width: 800px; margin: 0 auto; padding: 20px 16px; }
+
+    .search-bar {
+      background: var(--card-bg); border-radius: var(--radius);
+      box-shadow: var(--shadow); padding: 16px;
+      margin-bottom: 12px;
+    }
+    .search-input-wrap {
+      display: flex; gap: 8px; margin-bottom: 10px;
+    }
+    .search-input-wrap input {
+      flex: 1; padding: 11px 14px;
+      border: 2px solid var(--border); border-radius: 8px;
+      font-size: .95rem; outline: none; transition: border-color .2s;
+    }
+    .search-input-wrap input:focus { border-color: var(--primary); }
+    .search-input-wrap button {
+      padding: 11px 18px; background: var(--primary); color: #fff;
+      border: none; border-radius: 8px; font-size: .95rem;
+      cursor: pointer; font-weight: 600;
+    }
+    .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+    .filters select {
+      flex: 1; min-width: 100px; padding: 8px 10px;
+      border: 1.5px solid var(--border); border-radius: 8px;
+      font-size: .85rem; background: #fff; cursor: pointer;
+      color: var(--text);
+    }
+    .filters select:focus { outline: none; border-color: var(--primary); }
+
+    .result-count {
+      font-size: .88rem; color: var(--text-s);
+      margin-bottom: 12px; padding: 0 2px;
+    }
+    .result-count strong { color: var(--primary); }
+
+    /* ── 카드 ── */
+    .card {
+      background: var(--card-bg); border-radius: var(--radius);
+      box-shadow: var(--shadow); margin-bottom: 12px;
+      border: 1.5px solid var(--border); overflow: hidden;
+    }
+    .card-header {
+      padding: 16px 18px; cursor: pointer;
+      display: flex; justify-content: space-between; align-items: flex-start;
+      transition: background .15s;
+    }
+    .card-header:hover { background: #f8faff; }
+    .card-meta h3 { font-size: 1.05rem; font-weight: 700; color: var(--primary); margin-bottom: 4px; }
+    .card-meta h3 .dept { color: var(--text); font-weight: 500; }
+    .card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+    .tag {
+      display: inline-flex; align-items: center; gap: 3px;
+      font-size: .75rem; padding: 3px 9px; border-radius: 20px;
+    }
+    .tag-cohort   { background: #e8edf8; color: var(--primary); font-weight: 600; }
+    .tag-type     { background: #edf7ed; color: #2d7a2d; }
+    .tag-duration { background: #fdf4e3; color: #9a6800; }
+    .tag-count    { background: #f3edfc; color: #6a2db8; }
+    .card-toggle { font-size: 1.1rem; color: var(--text-s); flex-shrink: 0; padding-top: 2px; }
+
+    .card-body { display: none; border-top: 1.5px solid var(--border); }
+    .card-body.open { display: block; }
+    .card-section { padding: 14px 18px; border-bottom: 1px solid var(--border); }
+    .card-section:last-child { border-bottom: none; }
+    .section-title {
+      font-size: .8rem; font-weight: 700; color: var(--accent);
+      text-transform: uppercase; letter-spacing: .05em; margin-bottom: 8px;
+    }
+    .qa-text, .advice-text, .info-text {
+      font-size: .88rem; line-height: 1.75; color: var(--text);
+      white-space: pre-wrap; word-break: break-word;
+    }
+    .interview-info { display: flex; flex-wrap: wrap; gap: 8px; }
+    .info-item { font-size: .85rem; color: var(--text-s); }
+    .info-item strong { color: var(--text); }
+
+    mark { background: var(--highlight); border-radius: 2px; padding: 0 1px; }
+
+    /* ── 더보기 ── */
+    #load-more-wrap { text-align: center; padding: 16px 0; }
+    #btn-more {
+      padding: 11px 32px; background: var(--card-bg);
+      border: 2px solid var(--primary); color: var(--primary);
+      border-radius: 24px; font-size: .9rem; font-weight: 600;
+      cursor: pointer; transition: all .2s;
+    }
+    #btn-more:hover { background: var(--primary); color: #fff; }
+    #no-result {
+      text-align: center; padding: 60px 20px;
+      color: var(--text-s); font-size: .95rem; display: none;
+    }
+    #no-result .emoji { font-size: 2.5rem; margin-bottom: 10px; }
+
+    /* ── 반응형 ── */
+    @media (max-width: 480px) {
+      .auth-box { padding: 28px 20px; }
+      .card-meta h3 { font-size: .95rem; }
+      .filters select { min-width: 80px; font-size: .8rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-title">🏫 <span>수원외고</span> 면접후기 자료집</div>
+  <button id="btn-logout" onclick="logout()">로그아웃</button>
+</header>
+
+<!-- 인증 화면 -->
+<div id="auth-screen">
+  <div class="auth-box">
+    <div class="auth-icon">🔐</div>
+    <h2>수원외고 재학생 전용</h2>
+    <p>선배들의 면접 경험을 후배들과 함께합니다.<br>인증코드를 입력하면 이용할 수 있습니다.</p>
+    <div class="auth-input-wrap">
+      <input type="password" id="code-input" placeholder="인증코드 입력"
+             autocomplete="off" onkeydown="if(event.key==='Enter') login()">
+    </div>
+    <div id="auth-error"></div>
+    <button id="btn-login" onclick="login()">입 장 하 기</button>
+    <p class="auth-hint" id="auth-hint">담임선생님께 문의하세요</p>
+  </div>
+</div>
+
+<!-- 검색 화면 -->
+<div id="search-screen">
+  <div class="search-bar">
+    <div class="search-input-wrap">
+      <input type="text" id="search-input" placeholder="학교명, 학과, 전형명, 면접 내용 검색"
+             oninput="debounceSearch()">
+      <button onclick="doSearch()">🔍</button>
+    </div>
+    <div class="filters">
+      <select id="filter-cohort" onchange="doSearch()">
+        <option value="">기수 전체</option>
+        <option value="15기">15기</option>
+        <option value="16기">16기</option>
+        <option value="17기">17기</option>
+        <option value="18기">18기</option>
+      </select>
+      <select id="filter-school" onchange="doSearch()">
+        <option value="">학교 전체</option>
+      </select>
+      <select id="filter-type" onchange="doSearch()">
+        <option value="">전형 전체</option>
+        <option value="학생부종합">학생부종합</option>
+        <option value="학생부교과">학생부교과</option>
+        <option value="자기추천">자기추천</option>
+        <option value="논술">논술</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="result-count" id="result-count"></div>
+  <div id="card-list"></div>
+  <div id="no-result">
+    <div class="emoji">🔍</div>
+    <div>검색 결과가 없습니다.<br>다른 키워드로 검색해 보세요.</div>
+  </div>
+  <div id="load-more-wrap" style="display:none">
+    <button id="btn-more" onclick="loadMore()">더보기</button>
+  </div>
+</div>
+
+<script>
+// ── 전역 상태 ──
+let allData = [];
+let filtered = [];
+let shown = 0;
+const PAGE = 20;
+let authHash = '';
+let searchTimer = null;
+
+// ── 초기화 ──
+async function init() {
+  try {
+    const [authRes, dataRes] = await Promise.all([
+      fetch('auth.json'), fetch('interviews.json')
+    ]);
+    const auth = await authRes.json();
+    authHash = auth.hash;
+    document.getElementById('auth-hint').textContent = auth.hint || '담임선생님께 문의하세요';
+
+    allData = await dataRes.json();
+    // 기수 최신순 정렬
+    allData.sort((a, b) => (b.cohort || '').localeCompare(a.cohort || ''));
+    buildSchoolFilter();
+  } catch(e) {
+    console.error('데이터 로드 실패', e);
+  }
+  checkAuth();
+}
+
+// ── 학교 필터 옵션 자동 생성 ──
+function buildSchoolFilter() {
+  const schools = [...new Set(allData.map(d => d.school).filter(Boolean))].sort();
+  const sel = document.getElementById('filter-school');
+  schools.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s; opt.textContent = s;
+    sel.appendChild(opt);
+  });
+}
+
+// ── 인증 ──
+function checkAuth() {
+  const saved = localStorage.getItem('sawl_auth');
+  const expiry = localStorage.getItem('sawl_auth_expiry');
+  if (saved === authHash && expiry && Date.now() < Number(expiry)) {
+    showSearch();
+  } else {
+    showAuth();
+  }
+}
+
+async function login() {
+  const input = document.getElementById('code-input');
+  const errEl = document.getElementById('auth-error');
+  const code = input.value.trim();
+  if (!code) { errEl.textContent = '인증코드를 입력해주세요.'; return; }
+  const hash = await sha256(code);
+  if (hash === authHash) {
+    const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30일
+    localStorage.setItem('sawl_auth', hash);
+    localStorage.setItem('sawl_auth_expiry', expiry);
+    input.classList.remove('error');
+    errEl.textContent = '';
+    showSearch();
+  } else {
+    input.classList.add('error');
+    errEl.textContent = '인증코드가 올바르지 않습니다.';
+    input.value = '';
+    input.focus();
+  }
+}
+
+function logout() {
+  localStorage.removeItem('sawl_auth');
+  localStorage.removeItem('sawl_auth_expiry');
+  showAuth();
+}
+
+function showAuth() {
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('search-screen').style.display = 'none';
+  document.getElementById('btn-logout').style.display = 'none';
+  document.getElementById('code-input').focus();
+}
+
+function showSearch() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('search-screen').style.display = 'block';
+  document.getElementById('btn-logout').style.display = 'inline-block';
+  doSearch();
+}
+
+// ── 검색 ──
+function debounceSearch() {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(doSearch, 250);
+}
+
+function doSearch() {
+  const kw = document.getElementById('search-input').value.trim().toLowerCase();
+  const cohort = document.getElementById('filter-cohort').value;
+  const school = document.getElementById('filter-school').value;
+  const type   = document.getElementById('filter-type').value;
+
+  filtered = allData.filter(d => {
+    if (cohort && d.cohort !== cohort) return false;
+    if (school && d.school !== school) return false;
+    if (type   && !(d.admission_type || '').includes(type)) return false;
+    if (kw) {
+      const haystack = [d.school, d.department, d.admission_type, d.qa_content, d.advice]
+        .join(' ').toLowerCase();
+      if (!kw.split(/\s+/).every(word => haystack.includes(word))) return false;
+    }
+    return true;
+  });
+
+  shown = 0;
+  document.getElementById('card-list').innerHTML = '';
+  renderCount();
+  loadMore();
+}
+
+function renderCount() {
+  const total = allData.length;
+  const n = filtered.length;
+  document.getElementById('result-count').innerHTML =
+    `전체 <strong>${total}</strong>건 중 <strong>${n}</strong>건 검색됨`;
+  document.getElementById('no-result').style.display = n === 0 ? 'block' : 'none';
+}
+
+function loadMore() {
+  const kw = document.getElementById('search-input').value.trim();
+  const slice = filtered.slice(shown, shown + PAGE);
+  const list = document.getElementById('card-list');
+  slice.forEach(d => list.appendChild(makeCard(d, kw)));
+  shown += slice.length;
+
+  const moreWrap = document.getElementById('load-more-wrap');
+  const btn = document.getElementById('btn-more');
+  if (shown < filtered.length) {
+    moreWrap.style.display = 'block';
+    btn.textContent = `더보기 (${filtered.length - shown}건 남음)`;
+  } else {
+    moreWrap.style.display = 'none';
+  }
+}
+
+// ── 카드 렌더링 ──
+function makeCard(d, kw) {
+  const card = document.createElement('div');
+  card.className = 'card';
+
+  const tags = [];
+  if (d.cohort)           tags.push(`<span class="tag tag-cohort">${d.cohort}</span>`);
+  if (d.admission_type)   tags.push(`<span class="tag tag-type">${esc(d.admission_type)}</span>`);
+  if (d.interview_duration) tags.push(`<span class="tag tag-duration">⏱ ${esc(d.interview_duration)}</span>`);
+  if (d.interviewer_count)  tags.push(`<span class="tag tag-count">👥 ${esc(d.interviewer_count)}</span>`);
+
+  card.innerHTML = `
+    <div class="card-header" onclick="toggleCard(this)">
+      <div class="card-meta">
+        <h3>${hi(esc(d.school || '미확인'), kw)} <span class="dept">· ${hi(esc(d.department || ''), kw)}</span></h3>
+        <div class="card-tags">${tags.join('')}</div>
+      </div>
+      <div class="card-toggle">▼</div>
+    </div>
+    <div class="card-body">
+      ${d.procedure || d.tips ? `
+      <div class="card-section">
+        <div class="section-title">면접 정보</div>
+        <div class="interview-info">
+          ${d.procedure ? `<div class="info-item"><strong>절차</strong> ${esc(d.procedure)}</div>` : ''}
+          ${d.tips      ? `<div class="info-item"><strong>유의사항</strong> ${esc(d.tips)}</div>` : ''}
+        </div>
+      </div>` : ''}
+      ${d.qa_content ? `
+      <div class="card-section">
+        <div class="section-title">질문 및 답변</div>
+        <div class="qa-text">${hi(esc(d.qa_content), kw)}</div>
+      </div>` : ''}
+      ${d.advice ? `
+      <div class="card-section">
+        <div class="section-title">후배에게 하는 말</div>
+        <div class="advice-text">${hi(esc(d.advice), kw)}</div>
+      </div>` : ''}
+    </div>
+  `;
+  return card;
+}
+
+function toggleCard(header) {
+  const body   = header.nextElementSibling;
+  const toggle = header.querySelector('.card-toggle');
+  const open   = body.classList.toggle('open');
+  toggle.textContent = open ? '▲' : '▼';
+}
+
+// ── 유틸 ──
+function esc(str) {
+  return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function hi(html, kw) {
+  if (!kw) return html;
+  const words = kw.trim().split(/\s+/).filter(Boolean);
+  words.forEach(word => {
+    const re = new RegExp(`(${word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi');
+    html = html.replace(re, '<mark>$1</mark>');
+  });
+  return html;
+}
+
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+// ── 시작 ──
+init();
+</script>
+</body>
+</html>
