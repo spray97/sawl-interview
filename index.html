@@ -200,6 +200,16 @@
     .ai-tip { font-size: .82rem; color: var(--text-s); line-height: 1.6;
               border-top: 1px solid var(--border); padding-top: 8px; margin-top: 8px; }
     .ai-tip strong { color: var(--primary); }
+    .ai-section-label { font-size: .75rem; font-weight: 700; color: var(--primary);
+                        text-transform: uppercase; letter-spacing: .04em;
+                        margin: 12px 0 5px; }
+    .ai-trait-list, .ai-question-list { margin: 0; padding: 0 0 0 1.1em; }
+    .ai-trait-list li, .ai-question-list li { font-size: .83rem; line-height: 1.65; margin-bottom: 3px; }
+    .ai-question-list li { border-left: 3px solid var(--accent); padding-left: 8px;
+                           background: #fdfaf3; border-radius: 0 4px 4px 0;
+                           list-style: none; margin-bottom: 5px; }
+    .ai-format { font-size: .83rem; color: var(--text-s); line-height: 1.6; }
+    .ai-atmosphere { font-size: .83rem; color: var(--text-s); line-height: 1.6; font-style: italic; }
 
     mark { background: var(--highlight); border-radius: 2px; padding: 0 1px; }
 
@@ -793,9 +803,25 @@ function showSchoolDetail(school) {
   if (!ai) { box.innerHTML = '<div class="school-empty">분석 데이터 없음</div>'; return; }
   const diffClass = `diff-${ai.difficulty || ''}`;
   box.innerHTML = `
-    <div class="ai-summary" style="margin-bottom:12px">${esc(ai.summary || '')}</div>
-    <div class="ai-chips" style="margin-bottom:10px">
-      ${(ai.question_types || []).map(q => `<span class="ai-chip">${esc(q)}</span>`).join('')}
+    <div class="ai-summary" style="margin-bottom:8px">${esc(ai.summary || '')}</div>
+    ${ai.unique_traits?.length ? `
+      <div class="ai-section-label">이 학교만의 특징</div>
+      <ul class="ai-trait-list">
+        ${ai.unique_traits.map((t: string) => `<li>${esc(t)}</li>`).join('')}
+      </ul>` : ''}
+    ${ai.interview_format ? `
+      <div class="ai-section-label">면접 방식</div>
+      <div class="ai-format">${esc(ai.interview_format)}</div>` : ''}
+    ${ai.question_examples?.length ? `
+      <div class="ai-section-label">실제 기출 질문</div>
+      <ul class="ai-question-list">
+        ${ai.question_examples.map((q: string) => `<li>${esc(q)}</li>`).join('')}
+      </ul>` : ''}
+    ${ai.atmosphere ? `
+      <div class="ai-section-label">분위기</div>
+      <div class="ai-atmosphere">${esc(ai.atmosphere)}</div>` : ''}
+    <div class="ai-chips" style="margin-top:12px;margin-bottom:10px">
+      ${(ai.question_types || []).map((q: string) => `<span class="ai-chip">${esc(q)}</span>`).join('')}
       ${ai.difficulty ? `<span class="ai-chip ${diffClass}">난이도 ${esc(ai.difficulty)}</span>` : ''}
     </div>
     ${ai.tip ? `<div class="ai-tip"><strong>핵심 팁</strong> ${esc(ai.tip)}</div>` : ''}
