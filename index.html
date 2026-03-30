@@ -807,7 +807,7 @@ function showSchoolDetail(school) {
     ${ai.unique_traits?.length ? `
       <div class="ai-section-label">이 학교만의 특징</div>
       <ul class="ai-trait-list">
-        ${ai.unique_traits.map((t: string) => `<li>${esc(t)}</li>`).join('')}
+        ${ai.unique_traits.map((t) => `<li>${esc(t)}</li>`).join('')}
       </ul>` : ''}
     ${ai.interview_format ? `
       <div class="ai-section-label">면접 방식</div>
@@ -815,13 +815,13 @@ function showSchoolDetail(school) {
     ${ai.question_examples?.length ? `
       <div class="ai-section-label">실제 기출 질문</div>
       <ul class="ai-question-list">
-        ${ai.question_examples.map((q: string) => `<li>${esc(q)}</li>`).join('')}
+        ${ai.question_examples.map((q) => `<li>${esc(q)}</li>`).join('')}
       </ul>` : ''}
     ${ai.atmosphere ? `
       <div class="ai-section-label">분위기</div>
       <div class="ai-atmosphere">${esc(ai.atmosphere)}</div>` : ''}
     <div class="ai-chips" style="margin-top:12px;margin-bottom:10px">
-      ${(ai.question_types || []).map((q: string) => `<span class="ai-chip">${esc(q)}</span>`).join('')}
+      ${(ai.question_types || []).map((q) => `<span class="ai-chip">${esc(q)}</span>`).join('')}
       ${ai.difficulty ? `<span class="ai-chip ${diffClass}">난이도 ${esc(ai.difficulty)}</span>` : ''}
     </div>
     ${ai.tip ? `<div class="ai-tip"><strong>핵심 팁</strong> ${esc(ai.tip)}</div>` : ''}
