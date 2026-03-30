@@ -6515,6 +6515,19 @@
   {
     "cohort": "18기",
     "school": "연세대학교",
+    "department": "언더우드학부",
+    "admission_type": "국제인재전형",
+    "interview_duration": "면접 답변 준비 8분 / 면접 시간 5분",
+    "interviewer_count": "비대면(온라인)",
+    "procedure": "면접 대기 → 8분 준비시간 → (8분 끝나면 패드 화면에 10초 카운트다운 후 바로 시작) → 5분 말하기 → 바로 퇴실",
+    "tips": "절대 패드 만지지 말 것!! (조교가 다 설명해주니 걱정 안해도 됩니다~!)",
+    "qa_content": "질문 1. Intelligence is the ability to rapidly learn any skill or talent.\nSO → AI does not possess intelligence, due to its lack of speed and reliance on repetitive learning.\n\n질문 2.\nStrengths\n1) Allows humans to focus on more creative jobs & labor. Repetitive labor X\n2) Eventually result in higher happiness → Enhance efficiency in various fields & comfort, reduce dangerous and unwanted tasks\nWeaknesses\n1) Take away jobs from humans. People who were responsible for \"repetitive labor\" can be harmed financially\n2) Increase later be impossible to do. Human logic & cognitive independence diminish by humans excessively relying on AI. Tasks people did without AI will later be impossible to do.\n\n질문 3. (사례가 전혀 생각이 안나서..)\nEconomic crisis analysis → Difficult to anticipate humans reactions from difficult situations. shown opposite results that traditional theories could not explain. Human interpretation is still necessary. In many economic crisis countries and citizens have sometimes shown hesitation, grief, desire — Emotions cannot be fully understood with AI alone.\n\n총 4분 40초 정도 말했어요. 위에 적어놓은 거는 짧게 요약한거니까 참고만 해주세요..!",
+    "advice": "요즘 유디 문제가 쉬워졌다는 걸 뼈저리게 느낄 수 있었어요. 작년과 거의 똑같은 양식으로 문제를 출제했고, 주제도 매우 흔했습니다. 변별력이 없을 것 같아 걱정했어요.\n\n제가 주고 싶은 조언은 \"최대한 독창적으로 답변하자\" 입니다. 요즘 출제 경향을 보았을 때 절대 어렵게 내지 않습니다. 대신, 그 쉬운 문제에 대한 답변 중 그나마 튀는 답변을 하는 학생이 뽑힐 것 같아요! 평소에 보편적인 정보들을 알고 익혀두되, 항상 더 나아가 생각하는 연습 해보세요. \"교수님들 귀에 박힐 만한 답변을 생각해내자\" 라는 마인드로 연습하세요!\n\n면접 연습할 때 영상 꼭 찍으면서 하는 걸 추천해요. 연대는 다른 학교와 달리 비대면이기 때문에 집에서도 정말 실전 같이 연습할 수 있어요.\n\n평소에 영어로 생각하는 걸 습관화하면 정말 도움이 돼요! 학술적인 용어를 활용하는 연습을 많이 하세요. 국어 지문을 보며 영어로 번역하면서 연습하는 것도 좋아요.\n\n유창성보다 논리성이 더 중요하다는 것을 잊지 마세요! 8분 안에 다양한 사례와 이유를 떠올릴 수 있도록 평소에 영어 기사나 뉴스 (CNN10, Ted-ed, School of life 등 유튜브) 많이 봐두세요!",
+    "source_file": "2026 대입_18기 면접후기양식_연세대(언더우드학부)_30109 성은율-혼자만 pdf.pdf"
+  },
+  {
+    "cohort": "18기",
+    "school": "연세대학교",
     "department": "영어영문학과 (학부)",
     "admission_type": "활동우수 전형",
     "interview_duration": "면접 답변 준비 8분 / 면접 시간 5분",
