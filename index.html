@@ -447,31 +447,70 @@ let analysisData = null;
 let filtered = [];
 let shown = 0;
 const PAGE = 20;
-let authHash = '';
 let searchTimer = null;
+let encInterviewsRaw = '';
+let encAnalysisRaw   = '';
+
+// ── 암호화 상수 (encrypt-data.ts와 동일) ──
+const _SALT = new Uint8Array([83,65,87,76,45,73,78,84,69,82,86,73,69,87,50,54]);
+
+async function _deriveKey(password) {
+  const km = await crypto.subtle.importKey(
+    'raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey']
+  );
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt: _SALT, iterations: 100000, hash: 'SHA-256' },
+    km, { name: 'AES-GCM', length: 256 }, true, ['decrypt']
+  );
+}
+
+async function _decrypt(encStr, key) {
+  const { iv, ciphertext } = JSON.parse(encStr);
+  const ivBuf = Uint8Array.from(atob(iv), c => c.charCodeAt(0));
+  const ctBuf = Uint8Array.from(atob(ciphertext), c => c.charCodeAt(0));
+  const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: ivBuf }, key, ctBuf);
+  return new TextDecoder().decode(plain);
+}
+
+async function _getStoredKey() {
+  const jwk = localStorage.getItem('sawl_key');
+  if (!jwk) return null;
+  return crypto.subtle.importKey('jwk', JSON.parse(jwk), { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+}
+
+async function _storeKey(key) {
+  const jwk = await crypto.subtle.exportKey('jwk', key);
+  localStorage.setItem('sawl_key', JSON.stringify(jwk));
+  localStorage.setItem('sawl_auth_expiry', Date.now() + 14 * 24 * 60 * 60 * 1000);
+}
 
 // ── 초기화 ──
 async function init() {
   try {
-    const [authRes, dataRes, analysisRes] = await Promise.all([
-      fetch('auth.json'),
+    const [dataRes, analysisRes] = await Promise.all([
       fetch('interviews.json'),
       fetch('school-analysis.json')
     ]);
-    const auth = await authRes.json();
-    authHash = auth.hash;
-    document.getElementById('auth-hint').textContent = auth.hint || '담임선생님께 문의하세요';
-
-    allData = await dataRes.json();
-    allData.sort((a, b) => (b.cohort || '').localeCompare(a.cohort || ''));
-    buildSchoolFilter();
-
-    analysisData = await analysisRes.json();
-    buildAnalysisTabs();
+    encInterviewsRaw = await dataRes.text();
+    encAnalysisRaw   = await analysisRes.text();
   } catch(e) {
     console.error('데이터 로드 실패', e);
   }
-  checkAuth();
+  try {
+    const auth = await (await fetch('auth.json')).json();
+    document.getElementById('auth-hint').textContent = auth.hint || '담임선생님께 문의하세요';
+  } catch {}
+  await checkAuth();
+}
+
+async function _loadData(key) {
+  const interviewsJson = await _decrypt(encInterviewsRaw, key);
+  const analysisJson   = await _decrypt(encAnalysisRaw, key);
+  allData = JSON.parse(interviewsJson);
+  allData.sort((a, b) => (b.cohort || '').localeCompare(a.cohort || ''));
+  buildSchoolFilter();
+  analysisData = JSON.parse(analysisJson);
+  buildAnalysisTabs();
 }
 
 // ── 학교 필터 자동 생성 ──
@@ -486,12 +525,17 @@ function buildSchoolFilter() {
 }
 
 // ── 인증 ──
-function checkAuth() {
-  const saved = localStorage.getItem('sawl_auth');
+async function checkAuth() {
   const expiry = localStorage.getItem('sawl_auth_expiry');
-  if (saved === authHash && expiry && Date.now() < Number(expiry)) {
+  if (!expiry || Date.now() >= Number(expiry)) { showAuth(); return; }
+  try {
+    const key = await _getStoredKey();
+    if (!key) { showAuth(); return; }
+    await _loadData(key);
     showSearch();
-  } else {
+  } catch {
+    localStorage.removeItem('sawl_key');
+    localStorage.removeItem('sawl_auth_expiry');
     showAuth();
   }
 }
@@ -499,27 +543,36 @@ function checkAuth() {
 async function login() {
   const input = document.getElementById('code-input');
   const errEl = document.getElementById('auth-error');
-  const code = input.value.trim();
+  const btn   = document.getElementById('btn-login');
+  const code  = input.value.trim();
   if (!code) { errEl.textContent = '인증코드를 입력해주세요.'; return; }
-  const hash = await sha256(code);
-  if (hash === authHash) {
-    const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000;
-    localStorage.setItem('sawl_auth', hash);
-    localStorage.setItem('sawl_auth_expiry', expiry);
+
+  btn.textContent = '확인 중...';
+  btn.disabled = true;
+
+  try {
+    const key = await _deriveKey(code);
+    await _loadData(key);       // 복호화 실패 시 예외 발생 → wrong code
+    await _storeKey(key);
     input.classList.remove('error');
     errEl.textContent = '';
     showSearch();
-  } else {
+  } catch {
     input.classList.add('error');
     errEl.textContent = '인증코드가 올바르지 않습니다.';
     input.value = '';
     input.focus();
+  } finally {
+    btn.textContent = '입 장 하 기';
+    btn.disabled = false;
   }
 }
 
 function logout() {
-  localStorage.removeItem('sawl_auth');
+  localStorage.removeItem('sawl_key');
   localStorage.removeItem('sawl_auth_expiry');
+  localStorage.removeItem('sawl_auth'); // 구 버전 키 정리
+  allData = []; analysisData = null;
   showAuth();
 }
 
@@ -831,10 +884,6 @@ function hi(html, kw) {
   return html;
 }
 
-async function sha256(str) {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
-}
 
 // ── 시작 ──
 init();
