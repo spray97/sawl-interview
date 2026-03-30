@@ -692,10 +692,9 @@ function toggleAI(e, badge, school) {
 // ── 분석 탭 렌더링 ──
 function buildAnalysisTabs() {
   if (!analysisData) return;
-  buildCohortGrid();
-  buildQtypeList();
-  buildAdmissionGrid();
   buildSchoolSelector();
+  buildCohortGrid();
+  buildAdmissionGrid();
 }
 
 function buildCohortGrid() {
