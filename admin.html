@@ -49,7 +49,6 @@
       font-size: .85rem; color: var(--text-s);
       text-align: center; margin-bottom: 28px;
     }
-
     label {
       display: block; font-size: .85rem; font-weight: 600;
       color: var(--text-s); margin-bottom: 6px;
@@ -61,8 +60,6 @@
       margin-bottom: 18px;
     }
     input:focus { border-color: var(--primary); }
-    input.error { border-color: #e05252; }
-
     .btn-primary {
       width: 100%; padding: 14px;
       background: var(--primary); color: #fff;
@@ -73,38 +70,25 @@
     .btn-primary:hover:not(:disabled) { background: var(--primary-d); }
     .btn-primary:disabled { opacity: .6; cursor: not-allowed; }
 
-    .pat-row {
-      display: flex; gap: 8px; align-items: flex-start;
-      margin-bottom: 18px;
-    }
+    .pat-row { display: flex; gap: 8px; margin-bottom: 18px; }
     .pat-row input { margin-bottom: 0; flex: 1; }
     .pat-row button {
       padding: 12px 14px; white-space: nowrap;
       background: var(--bg); border: 2px solid var(--border);
       border-radius: 8px; font-size: .82rem; cursor: pointer;
-      color: var(--text-s); transition: border-color .2s;
-      flex-shrink: 0;
+      color: var(--text-s); transition: border-color .2s; flex-shrink: 0;
     }
     .pat-row button:hover { border-color: var(--primary); color: var(--primary); }
 
-    #status {
+    .status-box {
       margin-top: 20px; font-size: .875rem;
-      border-radius: 8px; padding: 12px 16px;
-      display: none;
+      border-radius: 8px; padding: 12px 16px; display: none;
     }
-    #status.info    { background: #e8f0fe; color: #1a3a6b; display: block; }
-    #status.success { background: #e6f4ea; color: #1b5e20; display: block; }
-    #status.error   { background: #fce8e6; color: #b71c1c; display: block; }
-
-    .progress-list {
-      margin-top: 8px; padding-left: 1.2em;
-      font-size: .82rem; line-height: 1.8;
-    }
-
-    .pat-saved-badge {
-      font-size: .78rem; color: #2e7d32;
-      margin-top: -12px; margin-bottom: 18px;
-    }
+    .status-box.info    { background: #e8f0fe; color: #1a3a6b; display: block; }
+    .status-box.success { background: #e6f4ea; color: #1b5e20; display: block; }
+    .status-box.error   { background: #fce8e6; color: #b71c1c; display: block; }
+    .progress-list { margin-top: 8px; padding-left: 1.2em; font-size: .82rem; line-height: 1.8; }
+    .pat-saved-badge { font-size: .78rem; color: #2e7d32; margin-top: -12px; margin-bottom: 18px; }
 
     #screen-change { display: none; }
   </style>
@@ -114,30 +98,32 @@
   <h1>수원외고 면접후기 <span>관리자</span></h1>
 </header>
 <main>
-  <!-- 1단계: 현재 인증코드 확인 -->
+
+  <!-- 1단계: 관리자 비밀번호 인증 -->
   <div class="card" id="screen-auth">
     <div class="card-icon">🔐</div>
     <h2>관리자 인증</h2>
-    <p class="desc">현재 인증코드를 입력하여 관리자 페이지에 접근합니다.</p>
-
-    <label for="old-pw">현재 인증코드</label>
-    <input type="password" id="old-pw" placeholder="현재 인증코드 입력"
+    <p class="desc">관리자 전용 비밀번호를 입력하세요.<br>서비스 인증코드와 다릅니다.</p>
+    <label for="admin-pw">관리자 비밀번호</label>
+    <input type="password" id="admin-pw" placeholder="관리자 비밀번호"
            autocomplete="off" onkeydown="if(event.key==='Enter') verifyAdmin()">
-
     <button class="btn-primary" id="btn-verify" onclick="verifyAdmin()">확인</button>
-    <div id="status"></div>
+    <div class="status-box" id="status-auth"></div>
   </div>
 
-  <!-- 2단계: 새 인증코드 + PAT 입력 -->
+  <!-- 2단계: 서비스 비밀번호 변경 -->
   <div class="card" id="screen-change">
     <div class="card-icon">✏️</div>
-    <h2>인증코드 변경</h2>
-    <p class="desc">새 인증코드와 GitHub PAT를 입력하세요.</p>
+    <h2>서비스 비밀번호 변경</h2>
+    <p class="desc">학생들이 접속에 사용하는 인증코드를 변경합니다.</p>
 
-    <label for="new-pw">새 인증코드</label>
+    <label for="old-pw">현재 서비스 인증코드</label>
+    <input type="password" id="old-pw" placeholder="현재 학생용 인증코드" autocomplete="off">
+
+    <label for="new-pw">새 서비스 인증코드</label>
     <input type="password" id="new-pw" placeholder="새 인증코드" autocomplete="off">
 
-    <label for="confirm-pw">새 인증코드 확인</label>
+    <label for="confirm-pw">새 서비스 인증코드 확인</label>
     <input type="password" id="confirm-pw" placeholder="새 인증코드 재입력" autocomplete="off">
 
     <label for="pat">GitHub Personal Access Token</label>
@@ -148,17 +134,23 @@
     <div id="pat-saved-msg" class="pat-saved-badge" style="display:none">✓ 저장된 PAT 불러옴</div>
 
     <button class="btn-primary" id="btn-change" onclick="changePassword()">비밀번호 변경</button>
-    <div id="status2"></div>
+    <div class="status-box" id="status-change"></div>
   </div>
-</main>
 
+</main>
 <script>
 const REPO  = 'spray97/sawl-interview';
 const FILES = ['interviews.json', 'school-analysis.json'];
-const _SALT = new Uint8Array([83,65,87,76,45,73,78,84,69,82,86,73,69,87,50,54]);
 
-let _oldKey   = null;
-let _fetched  = null;
+// 서비스 암호화용 salt (index.html과 동일)
+const _SALT = new Uint8Array([83,65,87,76,45,73,78,84,69,82,86,73,69,87,50,54]);
+// 관리자 인증 전용 salt (별도 분리)
+const _ADMIN_SALT = new Uint8Array([83,65,87,76,45,65,68,77,73,78,45,50,48,50,54]);
+
+// 관리자 토큰 검증 문자열
+const ADMIN_TOKEN_PLAIN = 'SAWL-ADMIN-OK';
+
+let _fetched = null; // GitHub에서 내려받은 암호화된 파일 텍스트
 
 window.addEventListener('load', () => {
   const pat = localStorage.getItem('sawl_admin_pat');
@@ -174,12 +166,13 @@ function clearPat() {
   document.getElementById('pat-saved-msg').style.display = 'none';
 }
 
-async function deriveKey(password, usages) {
+// ── Crypto 유틸 ──
+async function deriveKey(password, salt, usages) {
   const km = await crypto.subtle.importKey(
     'raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey']
   );
   return crypto.subtle.deriveKey(
-    { name: 'PBKDF2', salt: _SALT, iterations: 100000, hash: 'SHA-256' },
+    { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' },
     km, { name: 'AES-GCM', length: 256 }, false, usages
   );
 }
@@ -194,127 +187,137 @@ async function decrypt(encStr, key) {
 
 async function encrypt(plaintext, key) {
   const iv = crypto.getRandomValues(new Uint8Array(12));
-  const encoded = new TextEncoder().encode(plaintext);
-  const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoded);
-  return JSON.stringify({
-    iv: uint8ToBase64(iv),
-    ciphertext: uint8ToBase64(new Uint8Array(ciphertext))
-  });
-}
-
-function uint8ToBase64(bytes) {
-  let binary = '';
-  const CHUNK = 8192;
-  for (let i = 0; i < bytes.length; i += CHUNK) {
-    binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
-  }
-  return btoa(binary);
-}
-
-function strToBase64(str) {
-  const bytes = new TextEncoder().encode(str);
-  return uint8ToBase64(bytes);
-}
-
-async function getFileSHA(filename, token) {
-  const res = await fetch(
-    `https://api.github.com/repos/${REPO}/contents/${filename}`,
-    { headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' } }
+  const ciphertext = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv }, key, new TextEncoder().encode(plaintext)
   );
+  return JSON.stringify({ iv: u8b64(iv), ciphertext: u8b64(new Uint8Array(ciphertext)) });
+}
+
+function u8b64(bytes) {
+  let s = ''; const C = 8192;
+  for (let i = 0; i < bytes.length; i += C)
+    s += String.fromCharCode(...bytes.subarray(i, i + C));
+  return btoa(s);
+}
+
+function strToBase64(str) { return u8b64(new TextEncoder().encode(str)); }
+
+// ── GitHub API ──
+async function getFileSHA(filename, token) {
+  const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${filename}`,
+    { headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' } });
   if (!res.ok) throw new Error(`SHA 조회 실패: ${filename} (${res.status})`);
   return (await res.json()).sha;
 }
 
 async function updateFile(filename, content, sha, token) {
-  const res = await fetch(
-    `https://api.github.com/repos/${REPO}/contents/${filename}`,
-    {
-      method: 'PUT',
-      headers: {
-        Authorization: `token ${token}`,
-        'Content-Type': 'application/json',
-        Accept: 'application/vnd.github.v3+json'
-      },
-      body: JSON.stringify({
-        message: `비밀번호 변경 (${new Date().toLocaleDateString('ko-KR')})`,
-        content: strToBase64(content),
-        sha
-      })
-    }
-  );
+  const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${filename}`, {
+    method: 'PUT',
+    headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json',
+               Accept: 'application/vnd.github.v3+json' },
+    body: JSON.stringify({
+      message: `서비스 비밀번호 변경 (${new Date().toLocaleDateString('ko-KR')})`,
+      content: strToBase64(content), sha
+    })
+  });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(`업로드 실패: ${filename} — ${err.message || res.status}`);
   }
 }
 
+// ── UI ──
 function setStatus(id, type, html) {
   const el = document.getElementById(id);
-  el.className = type;
+  el.className = 'status-box ' + type;
   el.innerHTML = html;
 }
+function setBtn(id, text, disabled) {
+  const b = document.getElementById(id);
+  b.textContent = text; b.disabled = disabled;
+}
 
-// ── 1단계: 현재 인증코드 검증 ──
+// ── 1단계: 관리자 비밀번호 검증 ──
 async function verifyAdmin() {
-  const oldPw = document.getElementById('old-pw').value.trim();
-  if (!oldPw) { setStatus('status', 'error', '인증코드를 입력해주세요.'); return; }
+  const pw = document.getElementById('admin-pw').value.trim();
+  if (!pw) { setStatus('status-auth', 'error', '관리자 비밀번호를 입력해주세요.'); return; }
 
-  const btn = document.getElementById('btn-verify');
-  btn.textContent = '확인 중...'; btn.disabled = true;
-  setStatus('status', 'info', '🔑 인증코드 확인 중...');
+  setBtn('btn-verify', '확인 중...', true);
+  setStatus('status-auth', 'info', '🔑 인증 중...');
 
   try {
-    const key = await deriveKey(oldPw, ['decrypt']);
+    // auth.json에서 adminToken 가져오기
+    const authRes = await fetch(`https://raw.githubusercontent.com/${REPO}/main/auth.json?t=${Date.now()}`);
+    const authData = await authRes.json();
+    if (!authData.adminToken) throw new Error('관리자 토큰이 없습니다. 관리자에게 문의하세요.');
 
-    const fetched = await Promise.all(
+    // 관리자 salt로 키 유도 후 토큰 복호화 검증
+    const key = await deriveKey(pw, _ADMIN_SALT, ['decrypt']);
+    const plain = await decrypt(JSON.stringify(authData.adminToken), key);
+    if (plain !== ADMIN_TOKEN_PLAIN) throw new Error('wrong');
+
+    // 성공 → 서비스 파일도 미리 다운로드
+    _fetched = await Promise.all(
       FILES.map(f =>
         fetch(`https://raw.githubusercontent.com/${REPO}/main/${f}?t=${Date.now()}`)
-          .then(r => { if (!r.ok) throw new Error(); return r.text(); })
+          .then(r => { if (!r.ok) throw new Error(`파일 로드 실패: ${f}`); return r.text(); })
       )
     );
 
-    await Promise.all(fetched.map(enc => decrypt(enc, key)));
-
-    _oldKey  = key;
-    _fetched = fetched;
-
     document.getElementById('screen-auth').style.display   = 'none';
     document.getElementById('screen-change').style.display = 'block';
-  } catch {
-    setStatus('status', 'error', '❌ 인증코드가 올바르지 않습니다.');
+  } catch (e) {
+    const msg = (e.message === 'wrong' || e.message.includes('decrypt'))
+      ? '관리자 비밀번호가 올바르지 않습니다.'
+      : e.message;
+    setStatus('status-auth', 'error', `❌ ${msg}`);
   } finally {
-    btn.textContent = '확인'; btn.disabled = false;
+    setBtn('btn-verify', '확인', false);
   }
 }
 
-// ── 2단계: 비밀번호 변경 ──
+// ── 2단계: 서비스 비밀번호 변경 ──
 async function changePassword() {
+  const oldPw     = document.getElementById('old-pw').value.trim();
   const newPw     = document.getElementById('new-pw').value.trim();
   const confirmPw = document.getElementById('confirm-pw').value.trim();
   const pat       = document.getElementById('pat').value.trim();
 
-  if (!newPw || !confirmPw || !pat) {
-    setStatus('status2', 'error', '모든 필드를 입력해주세요.'); return;
+  if (!oldPw || !newPw || !confirmPw || !pat) {
+    setStatus('status-change', 'error', '모든 필드를 입력해주세요.'); return;
   }
   if (newPw !== confirmPw) {
-    setStatus('status2', 'error', '새 인증코드가 일치하지 않습니다.'); return;
+    setStatus('status-change', 'error', '새 인증코드가 일치하지 않습니다.'); return;
+  }
+  if (newPw === oldPw) {
+    setStatus('status-change', 'error', '새 인증코드가 현재 인증코드와 동일합니다.'); return;
   }
 
-  const btn = document.getElementById('btn-change');
-  btn.textContent = '처리 중...'; btn.disabled = true;
-
+  setBtn('btn-change', '처리 중...', true);
   const steps = [];
-  const addStep = (msg) => {
+  const addStep = msg => {
     steps.push(msg);
-    setStatus('status2', 'info', `<ul class="progress-list">${steps.map(s=>`<li>${s}</li>`).join('')}</ul>`);
+    setStatus('status-change', 'info',
+      `<ul class="progress-list">${steps.map(s=>`<li>${s}</li>`).join('')}</ul>`);
   };
 
   try {
-    addStep('🔒 새 비밀번호로 재암호화 중...');
-    const newKey = await deriveKey(newPw, ['encrypt']);
-    const reencrypted = await Promise.all(_fetched.map(enc =>
-      decrypt(enc, _oldKey).then(plain => encrypt(plain, newKey))
-    ));
+    addStep('🔑 키 생성 중...');
+    const [oldKey, newKey] = await Promise.all([
+      deriveKey(oldPw, _SALT, ['decrypt']),
+      deriveKey(newPw, _SALT, ['encrypt'])
+    ]);
+
+    addStep('🔓 현재 인증코드로 복호화 중...');
+    let decrypted;
+    try {
+      decrypted = await Promise.all(_fetched.map(enc => decrypt(enc, oldKey)));
+    } catch {
+      throw new Error('현재 서비스 인증코드가 올바르지 않습니다.');
+    }
+
+    addStep('🔒 새 인증코드로 재암호화 중...');
+    const reencrypted = await Promise.all(decrypted.map(plain => encrypt(plain, newKey)));
 
     addStep('📋 GitHub 파일 SHA 조회 중...');
     const shas = await Promise.all(FILES.map(f => getFileSHA(f, pat)));
@@ -324,19 +327,19 @@ async function changePassword() {
 
     localStorage.setItem('sawl_admin_pat', pat);
 
-    setStatus('status2', 'success',
-      `✅ 비밀번호 변경 완료!<br>
+    setStatus('status-change', 'success',
+      `✅ 서비스 비밀번호 변경 완료!<br>
        <small style="display:block;margin-top:8px">
-         GitHub Pages 반영까지 1~2분 소요될 수 있습니다.
+         GitHub Pages 반영까지 1~2분 소요됩니다.
        </small>
-       <a href="index.html" style="display:inline-block;margin-top:14px;color:#1a3a6b;font-weight:700;text-decoration:underline;">
+       <a href="index.html" style="display:inline-block;margin-top:14px;color:#1b5e20;font-weight:700;text-decoration:underline;">
          ← 메인 페이지로 돌아가기
        </a>`
     );
   } catch (e) {
-    setStatus('status2', 'error', `❌ ${e.message}`);
+    setStatus('status-change', 'error', `❌ ${e.message}`);
   } finally {
-    btn.textContent = '비밀번호 변경'; btn.disabled = false;
+    setBtn('btn-change', '비밀번호 변경', false);
   }
 }
 </script>
