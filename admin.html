@@ -70,16 +70,6 @@
     .btn-primary:hover:not(:disabled) { background: var(--primary-d); }
     .btn-primary:disabled { opacity: .6; cursor: not-allowed; }
 
-    .pat-row { display: flex; gap: 8px; margin-bottom: 18px; }
-    .pat-row input { margin-bottom: 0; flex: 1; }
-    .pat-row button {
-      padding: 12px 14px; white-space: nowrap;
-      background: var(--bg); border: 2px solid var(--border);
-      border-radius: 8px; font-size: .82rem; cursor: pointer;
-      color: var(--text-s); transition: border-color .2s; flex-shrink: 0;
-    }
-    .pat-row button:hover { border-color: var(--primary); color: var(--primary); }
-
     .status-box {
       margin-top: 20px; font-size: .875rem;
       border-radius: 8px; padding: 12px 16px; display: none;
@@ -88,7 +78,6 @@
     .status-box.success { background: #e6f4ea; color: #1b5e20; display: block; }
     .status-box.error   { background: #fce8e6; color: #b71c1c; display: block; }
     .progress-list { margin-top: 8px; padding-left: 1.2em; font-size: .82rem; line-height: 1.8; }
-    .pat-saved-badge { font-size: .78rem; color: #2e7d32; margin-top: -12px; margin-bottom: 18px; }
 
     #screen-change { display: none; }
   </style>
@@ -132,13 +121,6 @@
     <label for="confirm-pw">새 서비스 인증코드 확인</label>
     <input type="password" id="confirm-pw" placeholder="새 인증코드 재입력" autocomplete="off">
 
-    <label for="pat">GitHub Personal Access Token</label>
-    <div class="pat-row">
-      <input type="text" id="pat" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off" spellcheck="false">
-      <button onclick="clearPat()">삭제</button>
-    </div>
-    <div id="pat-saved-msg" class="pat-saved-badge" style="display:none">✓ 저장된 PAT 불러옴</div>
-
     <button class="btn-primary" id="btn-change" onclick="changePassword()">비밀번호 변경</button>
     <div class="status-box" id="status-change"></div>
   </div>
@@ -157,27 +139,17 @@ const _ADMIN_SALT = new Uint8Array([83,65,87,76,45,65,68,77,73,78,45,50,48,50,54
 // 관리자 토큰 검증 문자열
 const ADMIN_TOKEN_PLAIN = 'SAWL-ADMIN-OK';
 
+// GitHub에 실제로 쓰는 작업은 Cloudflare Worker가 대신 수행 (PAT는 Worker에만 보관)
+const WORKER_URL = 'https://sawl-interview-proxy.spray97.workers.dev';
+
 let _fetched = null;       // GitHub에서 내려받은 암호화된 학생용 파일 텍스트
 let _fetchedBackup = null; // GitHub에서 내려받은 관리자 백업 파일 텍스트
 let _adminKey = null;      // 관리자 비밀번호로 유도한 키 (백업 복호화/재암호화용)
+let _adminPw  = null;      // Worker 재검증용으로 보관 (메모리에만, 저장하지 않음)
 
 function toggleForgotOld() {
   const forgot = document.getElementById('forgot-old').checked;
   document.getElementById('old-pw-wrap').style.display = forgot ? 'none' : 'block';
-}
-
-window.addEventListener('load', () => {
-  const pat = localStorage.getItem('sawl_admin_pat');
-  if (pat) {
-    document.getElementById('pat').value = pat;
-    document.getElementById('pat-saved-msg').style.display = 'block';
-  }
-});
-
-function clearPat() {
-  localStorage.removeItem('sawl_admin_pat');
-  document.getElementById('pat').value = '';
-  document.getElementById('pat-saved-msg').style.display = 'none';
 }
 
 // ── Crypto 유틸 ──
@@ -214,32 +186,6 @@ function u8b64(bytes) {
   return btoa(s);
 }
 
-function strToBase64(str) { return u8b64(new TextEncoder().encode(str)); }
-
-// ── GitHub API ──
-async function getFileSHA(filename, token) {
-  const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${filename}`,
-    { headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' } });
-  if (!res.ok) throw new Error(`SHA 조회 실패: ${filename} (${res.status})`);
-  return (await res.json()).sha;
-}
-
-async function updateFile(filename, content, sha, token) {
-  const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${filename}`, {
-    method: 'PUT',
-    headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json',
-               Accept: 'application/vnd.github.v3+json' },
-    body: JSON.stringify({
-      message: `서비스 비밀번호 변경 (${new Date().toLocaleDateString('ko-KR')})`,
-      content: strToBase64(content), sha
-    })
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(`업로드 실패: ${filename} — ${err.message || res.status}`);
-  }
-}
-
 // ── UI ──
 function setStatus(id, type, html) {
   const el = document.getElementById(id);
@@ -270,6 +216,7 @@ async function verifyAdmin() {
     const plain = await decrypt(JSON.stringify(authData.adminToken), key);
     if (plain !== ADMIN_TOKEN_PLAIN) throw new Error('wrong');
     _adminKey = await deriveKey(pw, _ADMIN_SALT, ['decrypt', 'encrypt']);
+    _adminPw  = pw;
 
     // 성공 → 서비스 파일 + 관리자 백업 파일 미리 다운로드
     _fetched = await Promise.all(
@@ -304,9 +251,8 @@ async function changePassword() {
   const oldPw     = document.getElementById('old-pw').value.trim();
   const newPw     = document.getElementById('new-pw').value.trim();
   const confirmPw = document.getElementById('confirm-pw').value.trim();
-  const pat       = document.getElementById('pat').value.trim();
 
-  if (!newPw || !confirmPw || !pat || (!forgot && !oldPw)) {
+  if (!newPw || !confirmPw || (!forgot && !oldPw)) {
     setStatus('status-change', 'error', '모든 필드를 입력해주세요.'); return;
   }
   if (newPw !== confirmPw) {
@@ -355,15 +301,18 @@ async function changePassword() {
     addStep('🔒 관리자 백업 재암호화 중...');
     const rebackup = await Promise.all(decrypted.map(plain => encrypt(plain, _adminKey)));
 
-    addStep('📋 GitHub 파일 SHA 조회 중...');
-    const allFiles = [...FILES, ...BACKUP_FILES];
-    const shas = await Promise.all(allFiles.map(f => getFileSHA(f, pat)));
-
     addStep('🚀 GitHub에 업로드 중...');
+    const allFiles = [...FILES, ...BACKUP_FILES];
     const allContents = [...reencrypted, ...rebackup];
-    await Promise.all(allFiles.map((f, i) => updateFile(f, allContents[i], shas[i], pat)));
+    const files = Object.fromEntries(allFiles.map((f, i) => [f, allContents[i]]));
 
-    localStorage.setItem('sawl_admin_pat', pat);
+    const res = await fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ adminPassword: _adminPw, files }),
+    });
+    const result = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(result.error || `업로드 실패 (${res.status})`);
 
     setStatus('status-change', 'success',
       `✅ 서비스 비밀번호 변경 완료!<br>
