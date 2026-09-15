@@ -104,6 +104,36 @@
     #btn-login:hover { background: var(--primary-d); }
     .auth-hint { margin-top: 16px; font-size: .8rem; color: var(--text-s); }
 
+    /* ── 관리자 복구 모달 ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(20,28,48,.55);
+      display: none; align-items: center; justify-content: center;
+      padding: 20px; z-index: 200;
+    }
+    .modal-box {
+      background: var(--card-bg); border-radius: var(--radius);
+      box-shadow: var(--shadow); padding: 32px 28px;
+      max-width: 360px; width: 100%; text-align: center;
+    }
+    .modal-box h3 { font-size: 1.05rem; color: var(--primary); margin-bottom: 8px; }
+    .modal-box p  { font-size: .85rem; color: var(--text-s); margin-bottom: 18px; line-height: 1.6; }
+    .modal-box input {
+      width: 100%; padding: 12px 14px; margin-bottom: 8px;
+      border: 2px solid var(--border); border-radius: 8px;
+      font-size: .95rem; outline: none;
+    }
+    .modal-box input:focus { border-color: var(--primary); }
+    .modal-btn-primary {
+      width: 100%; padding: 12px; background: var(--primary); color: #fff;
+      border: none; border-radius: 8px; font-size: .95rem; font-weight: 700;
+      cursor: pointer; margin-top: 6px;
+    }
+    .modal-btn-primary:hover { background: var(--primary-d); }
+    .modal-btn-close {
+      width: 100%; padding: 10px; background: none; border: none;
+      color: var(--text-s); font-size: .82rem; cursor: pointer; margin-top: 6px;
+    }
+
     /* ── 탭 패널 공통 ── */
     .tab-panel { display: none; max-width: 800px; margin: 0 auto; padding: 20px 16px; }
     .tab-panel.active { display: block; }
@@ -363,6 +393,20 @@
   </div>
 </div>
 
+<!-- 관리자 복구 모달 (5회 오류 시) -->
+<div id="admin-recover-modal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="card-icon" style="font-size:2.2rem;margin-bottom:8px">🔑</div>
+    <h3>인증코드를 5회 잘못 입력하셨습니다</h3>
+    <p>관리자이신가요? 관리자 비밀번호를 입력하면 인증코드를 재설정할 수 있는 관리자 페이지로 안내해드립니다.</p>
+    <input type="password" id="recover-admin-pw" placeholder="관리자 비밀번호" autocomplete="off"
+           onkeydown="if(event.key==='Enter') verifyAdminRecover()">
+    <div id="recover-error" style="color:#e05252;font-size:.85rem;min-height:18px"></div>
+    <button class="modal-btn-primary" onclick="verifyAdminRecover()">확인</button>
+    <button class="modal-btn-close" onclick="closeRecoverModal()">닫기</button>
+  </div>
+</div>
+
 <!-- 검색 탭 -->
 <div id="tab-search" class="tab-panel active">
   <div class="search-bar">
@@ -462,6 +506,11 @@ let encAnalysisRaw   = '';
 
 // ── 암호화 상수 (encrypt-data.ts와 동일) ──
 const _SALT = new Uint8Array([83,65,87,76,45,73,78,84,69,82,86,73,69,87,50,54]);
+
+// ── 관리자 복구 모달용 상수 (admin.html과 동일) ──
+const _ADMIN_SALT = new Uint8Array([83,65,87,76,45,65,68,77,73,78,45,50,48,50,54]);
+const ADMIN_TOKEN_PLAIN = 'SAWL-ADMIN-OK';
+const FAIL_LIMIT = 5;
 
 async function _deriveKey(password) {
   const km = await crypto.subtle.importKey(
@@ -565,15 +614,53 @@ async function login() {
     await _storeKey(key);
     input.classList.remove('error');
     errEl.textContent = '';
+    localStorage.removeItem('sawl_fail_count');
     showSearch();
   } catch {
     input.classList.add('error');
     errEl.textContent = '인증코드가 올바르지 않습니다.';
     input.value = '';
     input.focus();
+    const fails = Number(localStorage.getItem('sawl_fail_count') || 0) + 1;
+    localStorage.setItem('sawl_fail_count', fails);
+    if (fails >= FAIL_LIMIT) openRecoverModal();
   } finally {
     btn.textContent = '입 장 하 기';
     btn.disabled = false;
+  }
+}
+
+// ── 관리자 복구 모달 (5회 오류 시) ──
+function openRecoverModal() {
+  document.getElementById('admin-recover-modal').style.display = 'flex';
+  document.getElementById('recover-admin-pw').focus();
+}
+function closeRecoverModal() {
+  document.getElementById('admin-recover-modal').style.display = 'none';
+  document.getElementById('recover-admin-pw').value = '';
+  document.getElementById('recover-error').textContent = '';
+}
+async function verifyAdminRecover() {
+  const pw = document.getElementById('recover-admin-pw').value.trim();
+  const errEl = document.getElementById('recover-error');
+  if (!pw) { errEl.textContent = '관리자 비밀번호를 입력해주세요.'; return; }
+  try {
+    const authData = await (await fetch(`auth.json?t=${Date.now()}`)).json();
+    if (!authData.adminToken) throw new Error('no-token');
+    const km = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey']);
+    const key = await crypto.subtle.deriveKey(
+      { name: 'PBKDF2', salt: _ADMIN_SALT, iterations: 100000, hash: 'SHA-256' },
+      km, { name: 'AES-GCM', length: 256 }, false, ['decrypt']
+    );
+    const { iv, ciphertext } = authData.adminToken;
+    const ivBuf = Uint8Array.from(atob(iv), c => c.charCodeAt(0));
+    const ctBuf = Uint8Array.from(atob(ciphertext), c => c.charCodeAt(0));
+    const plainBuf = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: ivBuf }, key, ctBuf);
+    if (new TextDecoder().decode(plainBuf) !== ADMIN_TOKEN_PLAIN) throw new Error('wrong');
+    localStorage.removeItem('sawl_fail_count');
+    window.location.href = 'admin.html';
+  } catch {
+    errEl.textContent = '관리자 비밀번호가 올바르지 않습니다.';
   }
 }
 
